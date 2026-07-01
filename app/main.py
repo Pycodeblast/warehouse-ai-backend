@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from app.database.base import create_db_tables
 from app.api.auth_routes import router as auth_router
 from app.api.protected_routes import router as protected_router
-
+from app.api.product_routes import router as product_router
 
 
 
@@ -14,6 +14,7 @@ app = FastAPI(
 
 app.include_router(auth_router)
 app.include_router(protected_router, prefix="/user")
+app.include_router(product_router)
 
 @app.on_event("startup")
 def startup():
