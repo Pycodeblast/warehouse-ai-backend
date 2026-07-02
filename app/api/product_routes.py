@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from app.auth.dependencies import get_current_user
+from app.auth.rbac import require_role
 
 from app.database.database import get_db
 from app.schemas.product import (
@@ -20,10 +22,13 @@ router = APIRouter(
 )
 
 @router.post("/", response_model=ProductResponse)
-def add_product(
+def create_new_product(
     product: ProductCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user)
 ):
+    require_role(user, ["admin"])
+
     return create_product(db, product)
 
 @router.get("/", response_model=list[ProductResponse])
@@ -46,8 +51,11 @@ def get_product(product_id: int, db: Session = Depends(get_db)):
 def update_existing_product(
     product_id: int,
     product: ProductUpdate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user)
 ):
+    require_role(user, ["admin"])
+
     updated_product = update_product(db, product_id, product)
 
     if not updated_product:
@@ -61,8 +69,11 @@ def update_existing_product(
 @router.delete("/{product_id}")
 def delete_existing_product(
     product_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user)
 ):
+    require_role(user, ["admin"])
+
     deleted_product = delete_product(db, product_id)
 
     if not deleted_product:
@@ -74,3 +85,4 @@ def delete_existing_product(
     return {
         "message": "Product deleted successfully"
     }
+
