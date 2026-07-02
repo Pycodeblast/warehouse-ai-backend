@@ -3,7 +3,23 @@ from app.models.user import User
 from app.core.logger import logger
 
 
+# -----------------------------
+# CLEAN SERIALIZER (IMPORTANT)
+# -----------------------------
+def serialize_user(user: User):
+    return {
+        "id": user.id,
+        "username": user.username,
+        "email": user.email,
+        "role": user.role,
+        "is_active": user.is_active,
+        "created_at": user.created_at
+    }
+
+
+# -----------------------------
 # GET ALL USERS
+# -----------------------------
 def get_all_users(db: Session):
     logger.info("Fetching all users")
 
@@ -11,10 +27,12 @@ def get_all_users(db: Session):
 
     logger.info(f"Total users found: {len(users)}")
 
-    return users
+    return [serialize_user(user) for user in users]
 
 
+# -----------------------------
 # GET USER BY ID
+# -----------------------------
 def get_user_by_id(db: Session, user_id: int):
     logger.info(f"Fetching user by ID: {user_id}")
 
@@ -26,14 +44,16 @@ def get_user_by_id(db: Session, user_id: int):
 
     logger.info(f"User found: {user.email}")
 
-    return user
+    return serialize_user(user)
 
 
+# -----------------------------
 # UPDATE USER ROLE
+# -----------------------------
 def update_user_role(db: Session, user_id: int, role: str):
-    logger.info(f"Updating role for user ID: {user_id} to {role}")
+    logger.info(f"Updating role for user ID: {user_id} → {role}")
 
-    user = get_user_by_id(db, user_id)
+    user = db.query(User).filter(User.id == user_id).first()
 
     if not user:
         logger.warning(f"Role update failed - user not found: {user_id}")
@@ -45,18 +65,21 @@ def update_user_role(db: Session, user_id: int, role: str):
     db.commit()
     db.refresh(user)
 
-    logger.info(
-        f"User role updated successfully: ID {user_id}, {old_role} → {role}"
-    )
+    logger.info(f"Role updated: {old_role} → {role} for user {user_id}")
 
-    return user
+    return {
+        "id": user.id,
+        "role": user.role
+    }
 
 
+# -----------------------------
 # DISABLE USER
+# -----------------------------
 def disable_user(db: Session, user_id: int):
     logger.info(f"Disabling user ID: {user_id}")
 
-    user = get_user_by_id(db, user_id)
+    user = db.query(User).filter(User.id == user_id).first()
 
     if not user:
         logger.warning(f"Disable failed - user not found: {user_id}")
@@ -69,4 +92,7 @@ def disable_user(db: Session, user_id: int):
 
     logger.info(f"User disabled successfully: ID {user_id}")
 
-    return user
+    return {
+        "id": user.id,
+        "is_active": user.is_active
+    }
