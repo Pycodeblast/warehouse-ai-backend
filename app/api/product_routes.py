@@ -27,7 +27,7 @@ def create_new_product(
     db: Session = Depends(get_db),
     user=Depends(get_current_user)
 ):
-    require_role(user, ["admin"])
+    require_role(user, ["admin", "manager"])
 
     return create_product(db, product)
 
@@ -54,7 +54,7 @@ def update_existing_product(
     db: Session = Depends(get_db),
     user=Depends(get_current_user)
 ):
-    require_role(user, ["admin"])
+    require_role(user, ["admin", "manager"])
 
     updated_product = update_product(db, product_id, product)
 
