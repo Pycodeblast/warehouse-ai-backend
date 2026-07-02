@@ -1,0 +1,34 @@
+name: Deploy to EC2 via OIDC
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::3983-7018-1588:role/github-actions-ec2-deploy-role
+          aws-region: ap-south-1
+
+      - name: Deploy to EC2 via SSH
+        run: |
+          echo "Connecting to EC2 and deploying..."
+          ssh -o StrictHostKeyChecking=no ec2-user@13.233.137.15 << 'EOF'
+            cd warehouse-ai-backend
+            git pull origin main
+            pip3 install -r requirements.txt
+            sudo systemctl restart backend || true
+          EOF
