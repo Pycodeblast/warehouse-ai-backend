@@ -12,6 +12,49 @@ UPLOAD_FOLDER = "uploads"
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
+
+ALLOWED_EXTENSIONS = {
+    ".pdf",
+    ".xlsx",
+    ".xls",
+    ".csv",
+    ".doc",
+    ".docx",
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".webp",
+    ".txt",
+}
+
+
+def get_file_type(extension: str):
+
+    extension = extension.lower()
+
+    if extension == ".pdf":
+        return "PDF"
+
+    elif extension in [".xls", ".xlsx"]:
+        return "EXCEL"
+
+    elif extension == ".csv":
+        return "CSV"
+
+    elif extension in [".doc", ".docx"]:
+        return "WORD"
+
+    elif extension in [".png", ".jpg", ".jpeg", ".webp"]:
+        return "IMAGE"
+
+    elif extension == ".txt":
+        return "TEXT"
+
+    return "OTHER"
+
+
+
 
 def save_file(file: UploadFile):
 

@@ -1,7 +1,22 @@
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
+from fastapi import (
+    APIRouter,
+    Depends,
+    UploadFile,
+    File,
+    HTTPException,
+)
+
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 import os
+import tempfile
+from datetime import datetime
+import pandas as pd
+
+from sqlalchemy.orm import Session
+
+from app.database.database import get_db
+from app.models.product import Product
 
 from app.database.database import get_db
 
@@ -20,7 +35,7 @@ from app.services.activity_service import create_activity
 
 router = APIRouter(
     prefix="/files",
-    tags=["Files"]
+    tags=["Files"],
 )
 
 
@@ -30,6 +45,7 @@ router = APIRouter(
 
 @router.post("/upload")
 def upload_file(
+    db: Session = Depends(get_db),
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
     user=Depends(get_current_user)
@@ -76,7 +92,7 @@ def upload_file(
 @router.get("/{filename}")
 def download_file(
     filename: str,
-    user=Depends(get_current_user)
+    user=Depends(get_current_user),
 ):
 
     require_role(
@@ -89,13 +105,31 @@ def download_file(
         filename
     )
 
-    if not os.path.exists(file_path):
+    if not os.path.exists(path):
         raise HTTPException(
             status_code=404,
-            detail="File not found"
+            detail="File not found.",
         )
 
     return FileResponse(
-        path=file_path,
-        filename=filename
+        path=path,
+        filename=filename,
+        media_type="application/octet-stream",
     )
+
+
+# -----------------------------------
+# Delete Uploaded File
+# -----------------------------------
+
+@router.delete("/{filename}")
+def remove_file(
+    filename: str,
+    user=Depends(get_current_user),
+):
+    require_role(
+        user,
+        ["admin"],
+    )
+
+    return delete_file(filename) 
