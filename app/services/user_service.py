@@ -96,3 +96,27 @@ def disable_user(db: Session, user_id: int):
         "id": user.id,
         "is_active": user.is_active
     }
+
+# -----------------------------
+# ENABLE USER
+# -----------------------------
+def enable_user(db: Session, user_id: int):
+    logger.info(f"Enabling user ID: {user_id}")
+
+    user = db.query(User).filter(User.id == user_id).first()
+
+    if not user:
+        logger.warning(f"Enable failed - user not found: {user_id}")
+        return None
+
+    user.is_active = True
+
+    db.commit()
+    db.refresh(user)
+
+    logger.info(f"User enabled successfully: ID {user_id}")
+
+    return {
+        "id": user.id,
+        "is_active": user.is_active
+    }

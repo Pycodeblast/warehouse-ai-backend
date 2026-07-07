@@ -9,6 +9,7 @@ from app.services.user_service import (
     get_all_users,
     update_user_role,
     disable_user,
+     enable_user,
 )
 
 router = APIRouter(
@@ -64,4 +65,24 @@ def disable_existing_user(
 
     return {
         "message": "User disabled successfully"
+    }
+
+@router.put("/{user_id}/enable")
+def enable_existing_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user)
+):
+    require_role(user, ["admin"])
+
+    enabled_user = enable_user(db, user_id)
+
+    if not enabled_user:
+        raise HTTPException(
+            status_code=404,
+            detail="User not found"
+        )
+
+    return {
+        "message": "User enabled successfully"
     }
