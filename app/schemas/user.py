@@ -7,13 +7,6 @@ class UserCreate(BaseModel):
     password: str
 
 
-class UserCreateByAdmin(BaseModel):
-    username: str
-    email: EmailStr
-    password: str
-    role: str
-
-
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
