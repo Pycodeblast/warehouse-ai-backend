@@ -9,13 +9,23 @@ from app.api.file_routes import router as file_router
 from app.api.ai_routes import router as ai_router
 from app.api.health_routes import router as health_router
 from app.core.exceptions import global_exception_handler
-
-
+from fastapi.middleware.cors import CORSMiddleware
+from app.api.dashboard_routes import router as dashboard_router
+from app.models.ai_chat import AIChat
 
 app = FastAPI(
     title="WarehouseAI Backend",
     description="Smart Inventory Management System API",
     version="1.0.0"
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"
+    ,"http://localhost:5174"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 app.add_exception_handler(Exception, global_exception_handler)
 
@@ -46,3 +56,6 @@ def health_check():
     return {
         "status": "healthy"
     }
+
+
+app.include_router(dashboard_router)

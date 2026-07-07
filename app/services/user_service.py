@@ -1,10 +1,14 @@
 from sqlalchemy.orm import Session
+
 from app.models.user import User
+from app.auth.auth import hash_password
 from app.core.logger import logger
+
+from app.services.activity_service import create_activity
 
 
 # -----------------------------
-# CLEAN SERIALIZER (IMPORTANT)
+# SERIALIZER
 # -----------------------------
 def serialize_user(user: User):
     return {
@@ -13,8 +17,55 @@ def serialize_user(user: User):
         "email": user.email,
         "role": user.role,
         "is_active": user.is_active,
-        "created_at": user.created_at
+        "created_at": user.created_at,
     }
+
+
+# -----------------------------
+# CREATE USER (ADMIN)
+# -----------------------------
+def create_user(db: Session, user_data, current_user):
+    logger.info(f"Creating user: {user_data.email}")
+
+    existing_user = (
+        db.query(User)
+        .filter(User.email == user_data.email)
+        .first()
+    )
+
+    if existing_user:
+        logger.warning(f"User already exists: {user_data.email}")
+        return None
+
+    new_user = User(
+        username=user_data.username,
+        email=user_data.email,
+        password_hash=hash_password(user_data.password),
+        role=user_data.role,
+        is_active=True,
+    )
+
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    admin = (
+        db.query(User)
+        .filter(User.id == current_user["user_id"])
+        .first()
+    )
+
+    create_activity(
+        db=db,
+        module="User",
+        action="CREATE",
+        description=f"{admin.username} created user {new_user.username}",
+        username=admin.username,
+    )
+
+    logger.info(f"User created successfully: {new_user.email}")
+
+    return serialize_user(new_user)
 
 
 # -----------------------------
@@ -42,21 +93,16 @@ def get_user_by_id(db: Session, user_id: int):
         logger.warning(f"User not found: ID {user_id}")
         return None
 
-    logger.info(f"User found: {user.email}")
-
     return serialize_user(user)
 
 
 # -----------------------------
 # UPDATE USER ROLE
 # -----------------------------
-def update_user_role(db: Session, user_id: int, role: str):
-    logger.info(f"Updating role for user ID: {user_id} → {role}")
-
+def update_user_role(db: Session, user_id: int, role: str, current_user):
     user = db.query(User).filter(User.id == user_id).first()
 
     if not user:
-        logger.warning(f"Role update failed - user not found: {user_id}")
         return None
 
     old_role = user.role
@@ -65,24 +111,30 @@ def update_user_role(db: Session, user_id: int, role: str):
     db.commit()
     db.refresh(user)
 
-    logger.info(f"Role updated: {old_role} → {role} for user {user_id}")
+    admin = (
+        db.query(User)
+        .filter(User.id == current_user["user_id"])
+        .first()
+    )
 
-    return {
-        "id": user.id,
-        "role": user.role
-    }
+    create_activity(
+        db=db,
+        module="User",
+        action="UPDATE_ROLE",
+        description=f"{admin.username} changed role of {user.username} from {old_role} to {role}",
+        username=admin.username,
+    )
+
+    return serialize_user(user)
 
 
 # -----------------------------
 # DISABLE USER
 # -----------------------------
-def disable_user(db: Session, user_id: int):
-    logger.info(f"Disabling user ID: {user_id}")
-
+def disable_user(db: Session, user_id: int, current_user):
     user = db.query(User).filter(User.id == user_id).first()
 
     if not user:
-        logger.warning(f"Disable failed - user not found: {user_id}")
         return None
 
     user.is_active = False
@@ -90,9 +142,49 @@ def disable_user(db: Session, user_id: int):
     db.commit()
     db.refresh(user)
 
-    logger.info(f"User disabled successfully: ID {user_id}")
+    admin = (
+        db.query(User)
+        .filter(User.id == current_user["user_id"])
+        .first()
+    )
 
-    return {
-        "id": user.id,
-        "is_active": user.is_active
-    }
+    create_activity(
+        db=db,
+        module="User",
+        action="DISABLE",
+        description=f"{admin.username} disabled user {user.username}",
+        username=admin.username,
+    )
+
+    return serialize_user(user)
+
+
+# -----------------------------
+# ENABLE USER
+# -----------------------------
+def enable_user(db: Session, user_id: int, current_user):
+    user = db.query(User).filter(User.id == user_id).first()
+
+    if not user:
+        return None
+
+    user.is_active = True
+
+    db.commit()
+    db.refresh(user)
+
+    admin = (
+        db.query(User)
+        .filter(User.id == current_user["user_id"])
+        .first()
+    )
+
+    create_activity(
+        db=db,
+        module="User",
+        action="ENABLE",
+        description=f"{admin.username} enabled user {user.username}",
+        username=admin.username,
+    )
+
+    return serialize_user(user)

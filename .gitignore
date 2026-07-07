@@ -1,4 +1,29 @@
+# Virtual Environment
 venv/
+
+# Environment Variables
 .env
+
+# Python Cache
 __pycache__/
 *.pyc
+
+# Database Files
+*.db
+
+# Uploaded Files
+uploads/
+
+# Logs
+*.log
+
+# Frontend Dependencies
+node_modules/
+
+# Frontend Build
+dist/
+
+# Frontend project inside backend
+warehouse-ai-frontend/
+package.json
+package-lock.json

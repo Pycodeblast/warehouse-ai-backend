@@ -6,9 +6,10 @@ class Base(DeclarativeBase):
     pass
 
 
-# Import all models AFTER Base is created
+# IMPORT ALL MODELS HERE
 from app.models.user import User
 from app.models.product import Product
+from app.models.activity_log import ActivityLog
 
 
 def create_db_tables():
