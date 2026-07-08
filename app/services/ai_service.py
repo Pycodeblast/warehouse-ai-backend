@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from app.models.product import Product
 from app.core.logger import logger
 from app.services.ai_chat_service import save_chat
-
+from app.models.user import User
 
 OLLAMA_URL = "http://localhost:11434/api/generate"
 
