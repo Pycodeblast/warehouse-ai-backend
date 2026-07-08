@@ -47,7 +47,7 @@ router = APIRouter(
 def upload_file(
     db: Session = Depends(get_db),
     file: UploadFile = File(...),
-    db: Session = Depends(get_db),
+    
     user=Depends(get_current_user)
 ):
 
