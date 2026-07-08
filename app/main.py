@@ -24,7 +24,8 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173"
-    ,"http://localhost:5174"
+    ,"http://localhost:5174",
+     "http://warehouse-ai-frontend.s3-website.ap-south-1.amazonaws.com"
     ],
     allow_credentials=True,
     allow_methods=["*"],
