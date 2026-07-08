@@ -30,11 +30,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-<<<<<<< HEAD
 
 
-=======
->>>>>>> c61e3e5 (Added AI chat history, dashboard analytics and activity logging)
 app.add_exception_handler(Exception, global_exception_handler)
 
 
