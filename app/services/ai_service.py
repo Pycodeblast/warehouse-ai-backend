@@ -105,7 +105,7 @@ def ask_ai(
 
         save_chat(
     db=db,
-    user_id=current_user["user_id"],
+    user_id=user_id,
     question=question,
     answer=str(count),
 )

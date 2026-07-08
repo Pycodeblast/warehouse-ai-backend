@@ -105,18 +105,17 @@ def download_file(
         filename
     )
 
-    if not os.path.exists(path):
+    if not os.path.exists(file_path):
         raise HTTPException(
             status_code=404,
             detail="File not found.",
         )
 
     return FileResponse(
-        path=path,
+        path=file_path,
         filename=filename,
         media_type="application/octet-stream",
     )
-
 
 # -----------------------------------
 # Delete Uploaded File
