@@ -12,9 +12,9 @@ from app.api.ai_routes import router as ai_router
 from app.api.health_routes import router as health_router
 from app.core.exceptions import global_exception_handler
 from app.api.dashboard_routes import router as dashboard_router
-from fastapi.middleware.cors import CORSMiddleware
+
 from app.api.dashboard_routes import router as dashboard_router
-from app.models.ai_chat import AIChat
+
 
 app = FastAPI(
     title="WarehouseAI Backend",
@@ -66,4 +66,4 @@ def health_check():
     }
 
 
-app.include_router(dashboard_router)
+
