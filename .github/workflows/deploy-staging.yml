@@ -40,4 +40,4 @@ jobs:
             git reset --hard origin/staging
             source venv/bin/activate
             pip install -r requirements.txt
-            sudo systemctl restart warehouse
+            sudo systemctl restart warehouse-staging
