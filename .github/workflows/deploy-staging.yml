@@ -3,8 +3,8 @@ name: Deploy to EC2
 on:
   push:
     branches:
-      - main
-      
+  
+      - staging
 
 permissions:
   id-token: write
@@ -37,7 +37,7 @@ jobs:
           script: |
             cd ~/warehouse-ai-backend
             git fetch origin
-            git reset --hard origin/main
+            git reset --hard origin/staging
             source venv/bin/activate
             pip install -r requirements.txt
             sudo systemctl restart warehouse
