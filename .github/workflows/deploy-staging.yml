@@ -35,7 +35,7 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd ~/warehouse-ai-backend
+            cd ~/warehouse-ai-backend-staging
             git fetch origin
             git reset --hard origin/staging
             source venv/bin/activate
