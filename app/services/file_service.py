@@ -95,24 +95,33 @@ def import_products_from_excel(
     db: Session
 ):
 
-    workbook = load_workbook(
-        file_path
-    )
-
+    workbook = load_workbook(file_path)
     sheet = workbook.active
 
-
-    products = []
-
+    imported_count = 0
+    skipped_count = 0
+    duplicate_skus = []
 
     # Skip header row
-    for row in sheet.iter_rows(
-        min_row=2,
-        values_only=True
-    ):
+    for row in sheet.iter_rows(min_row=2, values_only=True):
 
         name, sku, quantity, price = row[:4]
 
+        # Skip empty rows
+        if not sku:
+            continue
+
+        # Check whether SKU already exists
+        existing_product = (
+            db.query(Product)
+            .filter(Product.sku == sku)
+            .first()
+        )
+
+        if existing_product:
+            skipped_count += 1
+            duplicate_skus.append(sku)
+            continue
 
         product = Product(
             name=name,
@@ -121,13 +130,17 @@ def import_products_from_excel(
             price=price
         )
 
-
-        products.append(product)
-
-
-    db.add_all(products)
+        db.add(product)
+        imported_count += 1
 
     db.commit()
 
+    logger.info(
+        f"Imported: {imported_count}, Skipped: {skipped_count}"
+    )
 
-    return len(products)
+    return {
+        "imported": imported_count,
+        "skipped": skipped_count,
+        "duplicate_skus": duplicate_skus
+    }

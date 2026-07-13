@@ -9,14 +9,12 @@ class UploadedFile(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    file_name = Column(String, nullable=False)
+    original_name = Column(String, nullable=False)
 
-    file_path = Column(String, nullable=False)
+    storage_key = Column(String, nullable=False)
 
-    file_type = Column(String, nullable=False)
-
-    file_size = Column(Integer, nullable=False)
+    storage_type = Column(String, nullable=False)
 
     uploaded_by = Column(String, nullable=False)
 
-    uploaded_at = Column(DateTime, default=datetime.utcnow)
+    uploaded_at = Column(DateTime, default=datetime.utcnow) 

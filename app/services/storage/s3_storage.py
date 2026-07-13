@@ -1,6 +1,8 @@
-import boto3
 import os
 from uuid import uuid4
+
+import boto3
+from botocore.config import Config
 
 from .storage_interface import StorageInterface
 
@@ -9,7 +11,12 @@ class S3Storage(StorageInterface):
 
     def __init__(self):
         self.bucket = os.getenv("S3_BUCKET_NAME")
-        self.client = boto3.client("s3")
+
+        self.client = boto3.client(
+            "s3",
+            region_name=os.getenv("AWS_REGION"),
+            config=Config(signature_version="s3v4"),
+        )
 
     def upload(self, file):
 
@@ -26,7 +33,18 @@ class S3Storage(StorageInterface):
         return key
 
     def download(self, key):
-        pass
+
+        return self.client.generate_presigned_url(
+            "get_object",
+            Params={
+                "Bucket": self.bucket,
+                "Key": key,
+            },
+            ExpiresIn=300,
+        )
 
     def delete(self, key):
-        pass
+        self.client.delete_object(
+            Bucket=self.bucket,
+            Key=key,
+        )
